@@ -26,6 +26,7 @@ import com.liudaolunboluo.spy.SpyAPI;
 import com.liudaolunboluo.spy.SpyImpl;
 import com.liudaolunboluo.spy.SpyInterceptors;
 import com.liudaolunboluo.utils.ArthasCheckUtils;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -40,11 +41,14 @@ import java.util.List;
  * @date 2023/1/20
  */
 @Slf4j
+@NoArgsConstructor
 public class TracerTransformer implements ClassFileTransformer {
 
-    private static final String CLASS_NAME = "com.zyf.jinxServer.agent.Base";
-    private static final String METHOD_NAME = "process";
     private boolean skipJDKTrace = true;
+
+    private String targetClassName;
+
+    private String targetMethodName;
 
     private final AdviceListener listener = new TraceAdviceListener(false);
 
@@ -54,9 +58,15 @@ public class TracerTransformer implements ClassFileTransformer {
         SpyAPI.setSpy(spyImpl);
     }
 
+    public TracerTransformer(String targetClassName, String targetMethodName, boolean skipJDKTrace) {
+        this.skipJDKTrace = skipJDKTrace;
+        this.targetClassName = targetClassName;
+        this.targetMethodName = targetMethodName;
+    }
+
     @Override
     public byte[] transform(ClassLoader inClassLoader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (!className.equalsIgnoreCase(CLASS_NAME.replace(".", "/"))) {
+        if (!className.equalsIgnoreCase(targetClassName.replace(".", "/"))) {
             return classfileBuffer;
         }
         log.info("开始transform :{}", className);
@@ -175,7 +185,7 @@ public class TracerTransformer implements ClassFileTransformer {
             }
             return AsmUtils.toBytes(classNode, inClassLoader, classReader);
         } catch (Throwable t) {
-            log.error("方法:{}增强失败", CLASS_NAME, t);
+            log.error("方法:{}增强失败", targetClassName, t);
             return null;
         }
 
@@ -185,7 +195,7 @@ public class TracerTransformer implements ClassFileTransformer {
      * 是否需要忽略
      */
     private boolean isIgnore(MethodNode methodNode) {
-        return null == methodNode || isAbstract(methodNode.access) || !methodNode.name.equals(METHOD_NAME) || ArthasCheckUtils.isEquals(
+        return null == methodNode || isAbstract(methodNode.access) || !methodNode.name.equals(targetMethodName) || ArthasCheckUtils.isEquals(
                 methodNode.name, "<clinit>");
     }
 
