@@ -21,8 +21,7 @@ public class TraceAdviceListener extends AbstractTraceAdviceListener implements 
     @Override
     public void invokeBeforeTracing(ClassLoader classLoader, String tracingClassName, String tracingMethodName, String tracingMethodDesc, int tracingLineNumber)
             throws Throwable {
-        // normalize className later
-        log.info(tracingMethodName + " 调用invokeBeforeTracing   " + tracingClassName);
+        //hack 这里我也不知道为什么spyApi的atExit方法会调用一次，arthas的话是不会的，这里先强制手动排除掉
         if (tracingClassName.equals("com/liudaolunboluo/spy/SpyAPI") && tracingMethodName.equals("atExit")) {
             return;
         }
@@ -33,7 +32,7 @@ public class TraceAdviceListener extends AbstractTraceAdviceListener implements 
     @Override
     public void invokeAfterTracing(ClassLoader classLoader, String tracingClassName, String tracingMethodName, String tracingMethodDesc, int tracingLineNumber)
             throws Throwable {
-        //这里我也不知道为什么atBeforeInvoke会调用一次，如果让atBeforeInvoke调用了的话，从第三个方法开始parent就会打乱，导致最后结果不对
+        //hack 这里我也不知道为什么atBeforeInvoke会调用一次，如果让atBeforeInvoke调用了的话，从第三个方法开始parent就会打乱，导致最后结果不对
         if (tracingMethodName.equals("atBeforeInvoke")) {
             return;
         }

@@ -1,5 +1,6 @@
 package com.liudaolunboluo;
 
+import com.liudaolunboluo.listener.TraceAdviceListener;
 import com.liudaolunboluo.transformer.TracerTransformer;
 import com.liudaolunboluo.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class MainAgent {
             log.error("agent参数不符合格式，正确格式是类名+空格+方法名，例如：com.test.Base#process，结束");
             return;
         }
-        inst.addTransformer(new TracerTransformer(args[0], args[1], true), true);
+        inst.addTransformer(new TracerTransformer(args[0], args[1], true, new TraceAdviceListener(false)), true);
         try {
             Class targetClass = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> clazz.getName().equalsIgnoreCase(args[0])).findFirst()
                     .orElse(null);

@@ -1,6 +1,5 @@
 package com.liudaolunboluo.trace;
 
-import com.alibaba.fastjson.JSON;
 import com.liudaolunboluo.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,12 +35,10 @@ public class TraceTree {
         TraceNode child = findChild(current, className, methodName, lineNumber);
         if (child == null) {
             child = new MethodNode(className, methodName, lineNumber, isInvoking);
-            log.info("child是 " + methodName + "调用了add child,curre是 " + JSON.toJSONString(this.current));
             this.current.addChild(child);
         }
         child.begin();
         current = child;
-        log.info("child是 " + methodName + "和current互换了位置,此时的curre是 " + JSON.toJSONString(this.current));
         nodeCount += 1;
     }
 
@@ -73,10 +70,8 @@ public class TraceTree {
 
     public void end() {
         current.end();
-        log.info("调用了END");
         if (current.parent() != null) {
             //TODO 为什么会到达这里？ 调用end次数比begin多？
-            log.info("current是 " + JSON.toJSONString(this.current) + "current.parent互换位置,此时的curre是 " + JSON.toJSONString(current.parent()));
             current = current.parent();
         }
     }

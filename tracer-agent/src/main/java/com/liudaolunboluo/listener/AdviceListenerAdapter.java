@@ -14,13 +14,13 @@ public abstract class AdviceListenerAdapter implements AdviceListener {
     private boolean verbose;
 
     @Override
-    public long id() {
-        return id;
+    public void create() {
+        // default no-op
     }
 
     @Override
-    public void create() {
-        // default no-op
+    public long id() {
+        return id;
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.alibaba.deps.org.objectweb.asm.tree.MethodInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
 import com.liudaolunboluo.listener.AdviceListener;
 import com.liudaolunboluo.listener.AdviceListenerManager;
-import com.liudaolunboluo.listener.TraceAdviceListener;
 import com.liudaolunboluo.spy.SpyAPI;
 import com.liudaolunboluo.spy.SpyImpl;
 import com.liudaolunboluo.spy.SpyInterceptors;
@@ -50,7 +49,7 @@ public class TracerTransformer implements ClassFileTransformer {
 
     private String targetMethodName;
 
-    private final AdviceListener listener = new TraceAdviceListener(false);
+    private AdviceListener listener;
 
     private static SpyImpl spyImpl = new SpyImpl();
 
@@ -58,10 +57,11 @@ public class TracerTransformer implements ClassFileTransformer {
         SpyAPI.setSpy(spyImpl);
     }
 
-    public TracerTransformer(String targetClassName, String targetMethodName, boolean skipJDKTrace) {
+    public TracerTransformer(String targetClassName, String targetMethodName, boolean skipJDKTrace, AdviceListener listener) {
         this.skipJDKTrace = skipJDKTrace;
         this.targetClassName = targetClassName;
         this.targetMethodName = targetMethodName;
+        this.listener = listener;
     }
 
     @Override
@@ -103,7 +103,6 @@ public class TracerTransformer implements ClassFileTransformer {
             List<MethodNode> matchedMethods = new ArrayList<>();
             for (MethodNode methodNode : classNode.methods) {
                 if (!isIgnore(methodNode)) {
-                    //todo 过滤目标方法
                     matchedMethods.add(methodNode);
                 }
             }
@@ -140,7 +139,7 @@ public class TracerTransformer implements ClassFileTransformer {
 
             for (MethodNode methodNode : matchedMethods) {
                 if (AsmUtils.isNative(methodNode)) {
-                    //  logger.info("ignore native method: {}", AsmUtils.methodDeclaration(Type.getObjectType(classNode.name), methodNode));
+                    log.info("ignore native method: {}", AsmUtils.methodDeclaration(Type.getObjectType(classNode.name), methodNode));
                     continue;
                 }
                 // 先查找是否有 atBeforeInvoke 函数，如果有，则说明已经有trace了，则直接不再尝试增强，直接插入 listener
@@ -183,6 +182,7 @@ public class TracerTransformer implements ClassFileTransformer {
                 }
                 AdviceListenerManager.registerAdviceListener(inClassLoader, className, methodNode.name, methodNode.desc, listener);
             }
+            log.info("增强结束");
             return AsmUtils.toBytes(classNode, inClassLoader, classReader);
         } catch (Throwable t) {
             log.error("方法:{}增强失败", targetClassName, t);

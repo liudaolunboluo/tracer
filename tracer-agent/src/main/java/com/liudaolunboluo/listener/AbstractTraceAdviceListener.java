@@ -33,7 +33,6 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
 
     @Override
     public void before(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args) throws Throwable {
-        log.info("开始计算本次方法调用耗时，classLoader是 " + loader);
         TraceEntity traceEntity = threadLocalTraceEntity(loader);
         traceEntity.tree.begin(clazz.getName(), method.getName(), -1, false);
         traceEntity.deep++;
@@ -44,7 +43,6 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
     @Override
     public void afterReturning(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Object returnObject)
             throws Throwable {
-        log.info(method.getName() + "调用了afterReturning");
         threadLocalTraceEntity(loader).tree.end();
         final Advice advice = Advice.newForAfterReturning(loader, clazz, method, target, args, returnObject);
         finishing(loader, advice);
@@ -73,7 +71,6 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
         if (traceEntity.deep == 0) {
             try {
-
                 if (this.isVerbose()) {
                     System.out.print("  result: \n");
                 }
@@ -81,8 +78,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                 TraceView traceView = new TraceView();
                 traceView.draw(traceEntity.getModel());
             } catch (Throwable e) {
-                //     logger.warn("trace failed.", e);
-
+                log.warn("trace failed.", e);
             } finally {
                 threadBoundEntity.remove();
             }
