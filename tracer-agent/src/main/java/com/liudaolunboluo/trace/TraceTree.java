@@ -1,6 +1,6 @@
 package com.liudaolunboluo.trace;
 
-import com.liudaolunboluo.utils.StringUtils;
+import com.liudaolunboluo.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

@@ -24,7 +24,7 @@ import com.liudaolunboluo.listener.AdviceListenerManager;
 import com.liudaolunboluo.spy.SpyAPI;
 import com.liudaolunboluo.spy.SpyImpl;
 import com.liudaolunboluo.spy.SpyInterceptors;
-import com.liudaolunboluo.utils.ArthasCheckUtils;
+import com.liudaolunboluo.common.ArthasCheckUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

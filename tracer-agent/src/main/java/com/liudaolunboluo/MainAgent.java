@@ -2,7 +2,7 @@ package com.liudaolunboluo;
 
 import com.liudaolunboluo.listener.TraceAdviceListener;
 import com.liudaolunboluo.transformer.TracerTransformer;
-import com.liudaolunboluo.utils.StringUtils;
+import com.liudaolunboluo.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.instrument.Instrumentation;

@@ -1,6 +1,6 @@
 package com.liudaolunboluo.listener;
 
-import com.liudaolunboluo.utils.ConcurrentWeakKeyHashMap;
+import com.liudaolunboluo.common.ConcurrentWeakKeyHashMap;
 
 import java.util.ArrayList;
 import java.util.List;

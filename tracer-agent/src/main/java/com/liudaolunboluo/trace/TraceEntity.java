@@ -1,6 +1,6 @@
 package com.liudaolunboluo.trace;
 
-import com.liudaolunboluo.utils.ThreadUtil;
+import com.liudaolunboluo.common.ThreadUtil;
 
 /**
  * 用于在ThreadLocal中传递的实体

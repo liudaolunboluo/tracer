@@ -3,47 +3,38 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.liudaolunboluo</groupId>
+    <parent>
+        <groupId>com.liudaolunboluo.tracer</groupId>
+        <artifactId>tracer-all</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
     <artifactId>tracer-agent</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <logback.version>1.2.11</logback.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <bytekit-version>0.0.7</bytekit-version>
-        <fastjson-version>1.2.76</fastjson-version>
-        <lombok-version>1.18.20</lombok-version>
-    </properties>
+    <name>${project.artifactId}</name>
+    <url>https://github.com/liudaolunboluo/tracer</url>
 
     <dependencies>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>bytekit-core</artifactId>
-            <version>${bytekit-version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>${fastjson-version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok-version}</version>
         </dependency>
     </dependencies>
 

@@ -3,7 +3,7 @@ package com.liudaolunboluo.spy;
 import com.liudaolunboluo.listener.AdviceListener;
 import com.liudaolunboluo.listener.AdviceListenerManager;
 import com.liudaolunboluo.listener.InvokeTraceable;
-import com.liudaolunboluo.utils.StringUtils;
+import com.liudaolunboluo.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.liudaolunboluo.listener;
 
 import com.alibaba.deps.org.objectweb.asm.Type;
-import com.liudaolunboluo.utils.StringUtils;
+import com.liudaolunboluo.common.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
