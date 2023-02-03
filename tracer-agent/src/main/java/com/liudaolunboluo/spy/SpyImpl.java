@@ -91,7 +91,6 @@ public class SpyImpl extends SpyAPI.AbstractSpy {
         String methodDesc = info[2];
 
         List<AdviceListener> listeners = AdviceListenerManager.queryTraceAdviceListeners(classLoader, clazz.getName(), owner, methodName, methodDesc);
-        log.info("方法 " + methodName + "的listeners是 " + listeners);
         if (listeners != null) {
             for (AdviceListener adviceListener : listeners) {
                 try {

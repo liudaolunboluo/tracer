@@ -13,6 +13,7 @@ import org.springframework.boot.availability.ReadinessState;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
@@ -27,22 +28,23 @@ import java.lang.management.ManagementFactory;
 @ConditionalOnProperty(name = "spring.tracer.enabled", matchIfMissing = false)
 @EnableConfigurationProperties({ TracerProperties.class })
 @Slf4j
-public class TracerConfiguration implements ApplicationListener<AvailabilityChangeEvent> {
+public class TracerConfiguration {
 
     @Autowired
     private TracerProperties tracerProperties;
 
-    @Override
-    public void onApplicationEvent(AvailabilityChangeEvent event) {
-        if (ReadinessState.ACCEPTING_TRAFFIC == event.getState()) {
-            TracerLauncher tracerLauncher = new TracerLauncher();
-            String name = ManagementFactory.getRuntimeMXBean().getName();
-            String pid = name.split("@")[0];
-            TracerAttachParam tracerAttachParam = tracerProperties.convert2TracerAttachParam();
-            tracerAttachParam.setPid(pid);
-            tracerLauncher.launcher(tracerAttachParam);
-            log.info("tracer launch success");
+    @PostConstruct
+    public void startAttach() {
+        if (!StringUtils.hasText(tracerProperties.getTargetClassName()) || !StringUtils.hasText(tracerProperties.getTargetMethodName())) {
+            log.warn("please config tracer!");
+            return;
         }
+        TracerLauncher tracerLauncher = new TracerLauncher();
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String pid = name.split("@")[0];
+        TracerAttachParam tracerAttachParam = tracerProperties.convert2TracerAttachParam();
+        tracerAttachParam.setPid(pid);
+        tracerLauncher.launcher(tracerAttachParam);
+        log.info("tracer launch success");
     }
-
 }

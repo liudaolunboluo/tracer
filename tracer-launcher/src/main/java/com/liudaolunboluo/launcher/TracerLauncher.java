@@ -36,13 +36,23 @@ public class TracerLauncher {
             ZipUtil.unpack(coreJarUrl.openStream(), tempDir);
             String agentHome = tempDir.getAbsolutePath();
             File agentJarFile = new File(agentHome, ATTACH_JAR);
-            Runtime.getRuntime()
+            Process process = Runtime.getRuntime()
                     .exec("java -jar " + agentJarFile.getAbsolutePath() + " " + param.getTargetClassName() + " " + param.getTargetMethodName() + " "
                             + param.getPid());
+            printResults(process);
         } catch (Exception e) {
             log.warn("launch tracer fail", e);
         }
 
+    }
+
+    public static void printResults(Process process) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log.info(line);
+            }
+        }
     }
 
 }

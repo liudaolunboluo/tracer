@@ -69,7 +69,6 @@ public class TracerTransformer implements ClassFileTransformer {
         if (!className.equalsIgnoreCase(targetClassName.replace(".", "/"))) {
             return classfileBuffer;
         }
-        log.info("开始transform :{}", className);
         try {
             // 检查classloader能否加载到 SpyAPI，如果不能，则放弃增强
             try {
@@ -182,7 +181,6 @@ public class TracerTransformer implements ClassFileTransformer {
                 }
                 AdviceListenerManager.registerAdviceListener(inClassLoader, className, methodNode.name, methodNode.desc, listener);
             }
-            log.info("增强结束");
             return AsmUtils.toBytes(classNode, inClassLoader, classReader);
         } catch (Throwable t) {
             log.error("方法:{}增强失败", targetClassName, t);

@@ -36,7 +36,6 @@ public class MainAgent {
      * @param inst
      */
     public static void agentmain(String agentArgs, Instrumentation inst) {
-        System.out.println("agentArgs:" + agentArgs);
         agent(inst, agentArgs);
     }
 

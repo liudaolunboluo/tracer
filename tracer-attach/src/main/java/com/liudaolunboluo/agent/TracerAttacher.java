@@ -17,7 +17,6 @@ import java.net.URL;
  * @Description: attach类
  * @date 2023/2/1
  */
-@Slf4j
 public class TracerAttacher {
 
     private static final String AGENT_ZIP = "tracer-agent.zip";
@@ -27,7 +26,7 @@ public class TracerAttacher {
     public void attach(TracerAttachParam param) {
         URL coreJarUrl = this.getClass().getClassLoader().getResource(AGENT_ZIP);
         if (coreJarUrl == null) {
-            log.warn("{} is missing!", AGENT_ZIP);
+            System.out.println(AGENT_ZIP + " is missing!");
             return;
         }
         try {
@@ -38,8 +37,9 @@ public class TracerAttacher {
             VirtualMachine vm = VirtualMachine.attach(param.getPid());
             vm.loadAgent(agentJarFile.getAbsolutePath(), param.getTargetClassName() + "#" + param.getTargetMethodName());
             vm.detach();
+            System.out.println("attach " + param.getPid() + " success!");
         } catch (Exception e) {
-            log.warn("attach tracer fail", e);
+            System.out.println("attach tracer fail " + e);
         }
     }
 }
