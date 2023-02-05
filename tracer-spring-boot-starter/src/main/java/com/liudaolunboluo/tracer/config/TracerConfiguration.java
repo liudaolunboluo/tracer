@@ -29,16 +29,19 @@ public class TracerConfiguration {
 
     @PostConstruct
     public void startAttach() {
-        if (!StringUtils.hasText(tracerProperties.getTargetClassName()) || !StringUtils.hasText(tracerProperties.getTargetMethodName())) {
-            log.warn("please config tracer!");
+        if (tracerProperties.getTargetClassList() == null || tracerProperties.getTargetClassList().size() == 0) {
+            log.warn("plz config tracer!");
             return;
         }
         TracerLauncher tracerLauncher = new TracerLauncher();
         String name = ManagementFactory.getRuntimeMXBean().getName();
+        if (!StringUtils.hasText(name)) {
+            log.warn("can not get current pid,plz check it!");
+            return;
+        }
         String pid = name.split("@")[0];
-        TracerAttachParam tracerAttachParam = tracerProperties.convert2TracerAttachParam();
-        tracerAttachParam.setPid(pid);
-        tracerLauncher.launcher(tracerAttachParam);
+        TracerAttachParam tracerAttachParam = tracerProperties.buildTracerAttachParam(pid);
+        tracerLauncher.launch(tracerAttachParam);
         log.info("tracer launch success");
     }
 }

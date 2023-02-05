@@ -1,5 +1,6 @@
 package com.liudaolunboluo.tracer.launcher;
 
+import com.alibaba.fastjson.JSON;
 import com.liudaolunboluo.tracer.param.TracerAttachParam;
 import com.liudaolunboluo.tracer.common.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class TracerLauncher {
 
     private static final String ATTACH_JAR = "tracer-attach.jar";
 
-    public void launcher(TracerAttachParam param) {
+    public void launch(TracerAttachParam param) {
         URL coreJarUrl = this.getClass().getClassLoader().getResource(ATTACH_ZIP);
         if (coreJarUrl == null) {
             log.warn("{} is missing!", ATTACH_ZIP);
@@ -36,9 +37,8 @@ public class TracerLauncher {
             ZipUtil.unpack(coreJarUrl.openStream(), tempDir);
             String agentHome = tempDir.getAbsolutePath();
             File agentJarFile = new File(agentHome, ATTACH_JAR);
-            Process process = Runtime.getRuntime()
-                    .exec("java -jar " + agentJarFile.getAbsolutePath() + " " + param.getTargetClassName() + " " + param.getTargetMethodName() + " "
-                            + param.getPid());
+            //java -jar tracer-attach.jar configJson
+            Process process = Runtime.getRuntime().exec("java -jar " + agentJarFile.getAbsolutePath() + " " + JSON.toJSONString(param));
             printResults(process);
         } catch (Exception e) {
             log.warn("launch tracer-attach fail", e);

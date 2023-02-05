@@ -39,9 +39,8 @@
             <artifactId>zt-zip</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.liudaolunboluo.tracer</groupId>
-            <artifactId>tracer-attach</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.liudaolunboluo.tracer</groupId>

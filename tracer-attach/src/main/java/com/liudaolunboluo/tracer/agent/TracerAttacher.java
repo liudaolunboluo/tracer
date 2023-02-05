@@ -1,5 +1,6 @@
 package com.liudaolunboluo.tracer.agent;
 
+import com.alibaba.fastjson.JSON;
 import com.liudaolunboluo.tracer.param.TracerAttachParam;
 import com.liudaolunboluo.tracer.common.CommonUtil;
 
@@ -34,7 +35,7 @@ public class TracerAttacher {
             String agentHome = tempDir.getAbsolutePath();
             File agentJarFile = new File(agentHome, AGENT_JAR);
             VirtualMachine vm = VirtualMachine.attach(param.getPid());
-            vm.loadAgent(agentJarFile.getAbsolutePath(), param.getTargetClassName() + "#" + param.getTargetMethodName());
+            vm.loadAgent(agentJarFile.getAbsolutePath(), JSON.toJSONString(param.getTargetClassList()) + " " + param.getIsSkipJdk());
             vm.detach();
             System.out.println("attach " + param.getPid() + " success!");
         } catch (Exception e) {

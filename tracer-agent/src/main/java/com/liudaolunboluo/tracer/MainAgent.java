@@ -1,12 +1,17 @@
 package com.liudaolunboluo.tracer;
 
+import com.alibaba.fastjson.JSON;
 import com.liudaolunboluo.tracer.listener.TraceAdviceListener;
+import com.liudaolunboluo.tracer.param.TargetClass;
 import com.liudaolunboluo.tracer.transformer.TracerTransformer;
 import com.liudaolunboluo.tracer.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyunfan@fiture.com
@@ -40,27 +45,24 @@ public class MainAgent {
     }
 
     private static void agent(Instrumentation inst, String agentArgs) {
-        //hack agentArgs暂时为类名+#+方法名，例如：com.test.Base#process
         if (StringUtils.isBlank(agentArgs)) {
             log.error("agent参数为空，结束");
             return;
         }
-        String[] args = agentArgs.split(SEPARATOR);
-        if (args.length != 2) {
-            log.error("agent参数不符合格式，正确格式是类名+空格+方法名，例如：com.test.Base#process，结束");
-            return;
-        }
-        inst.addTransformer(new TracerTransformer(args[0], args[1], true, new TraceAdviceListener(false)), true);
-        try {
-            Class targetClass = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> clazz.getName().equalsIgnoreCase(args[0])).findFirst()
-                    .orElse(null);
-            if (targetClass != null) {
-                inst.retransformClasses(targetClass);
-            } else {
-                log.warn("class:{} not found!", args[0]);
+        String[] configArr = agentArgs.split(" ");
+        List<TargetClass> targetClasses = JSON.parseArray(configArr[0], TargetClass.class);
+        inst.addTransformer(
+                new TracerTransformer(targetClasses, new TraceAdviceListener(false), configArr.length <= 1 || Boolean.parseBoolean(configArr[1])),
+                true);
+        Set<String> targetClassNames = targetClasses.stream().map(TargetClass::getFullClassName).collect(Collectors.toSet());
+        List<Class> matchingClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> targetClassNames.contains(clazz.getName()))
+                .collect(Collectors.toList());
+        for (Class clazz : matchingClasses) {
+            try {
+                inst.retransformClasses(clazz);
+            } catch (Exception e) {
+                log.error("class:{} agent load failed!", clazz.getName(), e);
             }
-        } catch (Exception e) {
-            log.error("agent load failed!", e);
         }
     }
 

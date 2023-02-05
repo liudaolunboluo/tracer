@@ -1,8 +1,12 @@
 package com.liudaolunboluo.tracer.property;
 
+import com.liudaolunboluo.tracer.param.TargetClass;
 import com.liudaolunboluo.tracer.param.TracerAttachParam;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.List;
 
 /**
  * @author zhangyunfan@fiture.com
@@ -16,25 +20,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TracerProperties {
 
     /**
-     * 目标类名
+     * 是否忽略JDK
      */
-    private String targetClassName;
+    private Boolean isSkipJdk = true;
 
-    /**
-     * 目标方法名
-     */
-    private String targetMethodName;
+    List<TargetClass> targetClassList;
 
-    /**
-     * 是否忽略jdk方法
-     */
-    private Boolean isSkipJdk;
-
-    public TracerAttachParam convert2TracerAttachParam() {
-        TracerAttachParam tracerAttachParam = new TracerAttachParam();
-        tracerAttachParam.setTargetMethodName(this.targetMethodName);
-        tracerAttachParam.setTargetClassName(this.targetClassName);
-        tracerAttachParam.setIsSkipJdk(this.isSkipJdk);
-        return tracerAttachParam;
+    public TracerAttachParam buildTracerAttachParam(String pid) {
+        return TracerAttachParam.builder().targetClassList(targetClassList).isSkipJdk(isSkipJdk).pid(pid).build();
     }
 }

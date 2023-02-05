@@ -21,6 +21,8 @@ import com.alibaba.deps.org.objectweb.asm.tree.MethodInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
 import com.liudaolunboluo.tracer.listener.AdviceListener;
 import com.liudaolunboluo.tracer.listener.AdviceListenerManager;
+import com.liudaolunboluo.tracer.param.TargetClass;
+import com.liudaolunboluo.tracer.param.TargetMethod;
 import com.liudaolunboluo.tracer.spy.SpyAPI;
 import com.liudaolunboluo.tracer.spy.SpyImpl;
 import com.liudaolunboluo.tracer.spy.SpyInterceptors;
@@ -31,7 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyunfan@fiture.com
@@ -43,11 +48,14 @@ import java.util.List;
 @NoArgsConstructor
 public class TracerTransformer implements ClassFileTransformer {
 
-    private boolean skipJDKTrace = true;
+    /**
+     * key:className,value:class's method collect
+     */
+    private Map<String, List<String>> classMethodMap;
 
-    private String targetClassName;
+    private Boolean isSkipJdk = true;
 
-    private String targetMethodName;
+    private List<String> targetClassNameList;
 
     private AdviceListener listener;
 
@@ -57,16 +65,27 @@ public class TracerTransformer implements ClassFileTransformer {
         SpyAPI.setSpy(spyImpl);
     }
 
-    public TracerTransformer(String targetClassName, String targetMethodName, boolean skipJDKTrace, AdviceListener listener) {
-        this.skipJDKTrace = skipJDKTrace;
-        this.targetClassName = targetClassName;
-        this.targetMethodName = targetMethodName;
+    public TracerTransformer(List<TargetClass> targetClassesList, AdviceListener listener, Boolean isSkipJdk) {
         this.listener = listener;
+        this.isSkipJdk = isSkipJdk;
+        initConfig(targetClassesList);
+
+    }
+
+    private void initConfig(List<TargetClass> targetClassesList) {
+        classMethodMap = new HashMap<>();
+        targetClassNameList = new ArrayList<>(targetClassesList.size());
+        for (TargetClass targetClass : targetClassesList) {
+            String replaceClassName = targetClass.getFullClassName().replace(".", "/");
+            targetClassNameList.add(replaceClassName);
+            classMethodMap.put(replaceClassName,
+                    targetClass.getTargetMethodList().stream().map(TargetMethod::getMethodName).collect(Collectors.toList()));
+        }
     }
 
     @Override
     public byte[] transform(ClassLoader inClassLoader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (!className.equalsIgnoreCase(targetClassName.replace(".", "/"))) {
+        if (!targetClassNameList.contains(className)) {
             return classfileBuffer;
         }
         try {
@@ -90,7 +109,8 @@ public class TracerTransformer implements ClassFileTransformer {
             interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyInterceptor1.class));
             interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyInterceptor2.class));
             interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyInterceptor3.class));
-            if (!this.skipJDKTrace) {
+            if (Boolean.FALSE.equals(this.isSkipJdk)) {
+                log.info("开始jdk计算");
                 interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyTraceInterceptor1.class));
                 interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyTraceInterceptor2.class));
                 interceptorProcessors.addAll(defaultInterceptorClassParser.parse(SpyInterceptors.SpyTraceInterceptor3.class));
@@ -101,7 +121,7 @@ public class TracerTransformer implements ClassFileTransformer {
             }
             List<MethodNode> matchedMethods = new ArrayList<>();
             for (MethodNode methodNode : classNode.methods) {
-                if (!isIgnore(methodNode)) {
+                if (!isIgnore(methodNode, classNode.name)) {
                     matchedMethods.add(methodNode);
                 }
             }
@@ -146,7 +166,8 @@ public class TracerTransformer implements ClassFileTransformer {
                     for (AbstractInsnNode insnNode = methodNode.instructions.getFirst(); insnNode != null; insnNode = insnNode.getNext()) {
                         if (insnNode instanceof MethodInsnNode) {
                             final MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
-                            if (this.skipJDKTrace) {
+                            if (Boolean.TRUE.equals(this.isSkipJdk)) {
+                                log.info("isSkipJdk是true");
                                 if (methodInsnNode.owner.startsWith("java/")) {
                                     continue;
                                 }
@@ -183,7 +204,7 @@ public class TracerTransformer implements ClassFileTransformer {
             }
             return AsmUtils.toBytes(classNode, inClassLoader, classReader);
         } catch (Throwable t) {
-            log.error("方法:{}增强失败", targetClassName, t);
+            log.error("增强失败", t);
             return null;
         }
 
@@ -192,8 +213,12 @@ public class TracerTransformer implements ClassFileTransformer {
     /**
      * 是否需要忽略
      */
-    private boolean isIgnore(MethodNode methodNode) {
-        return null == methodNode || isAbstract(methodNode.access) || !methodNode.name.equals(targetMethodName) || ArthasCheckUtils.isEquals(
+    private boolean isIgnore(MethodNode methodNode, String className) {
+        List<String> methodNames = classMethodMap.get(className);
+        if (methodNames == null || methodNames.isEmpty()) {
+            return true;
+        }
+        return null == methodNode || isAbstract(methodNode.access) || !methodNames.contains(methodNode.name) || ArthasCheckUtils.isEquals(
                 methodNode.name, "<clinit>");
     }
 

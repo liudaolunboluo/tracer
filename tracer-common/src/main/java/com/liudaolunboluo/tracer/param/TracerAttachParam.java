@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author zhangyunfan@fiture.com
  * @version 1.0
@@ -13,9 +15,9 @@ import lombok.NoArgsConstructor;
  * @date 2023/2/1
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TracerAttachParam {
 
     /**
@@ -24,17 +26,13 @@ public class TracerAttachParam {
     private String pid;
 
     /**
+     * 是否忽略JDK
+     */
+    @Builder.Default
+    private Boolean isSkipJdk = true;
+
+    /**
      * 目标类名
      */
-    private String targetClassName;
-
-    /**
-     * 目标方法名
-     */
-    private String targetMethodName;
-
-    /**
-     * 是否忽略jdk方法
-     */
-    private Boolean isSkipJdk;
+    private List<TargetClass> targetClassList;
 }

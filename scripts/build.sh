@@ -17,6 +17,9 @@ cd target
 zip -r -o tracer-attach.zip tracer-attach.jar
 cd ../../
 cp tracer-attach/target/tracer-attach.zip tracer-launcher/src/main/resources
+cd tracer-common
+mvn clean install deploy
+cd ..
 cd tracer-launcher
 mvn clean install deploy
 cd ..

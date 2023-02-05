@@ -21,15 +21,6 @@
     </properties>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-api</artifactId>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>ch.qos.logback</groupId>-->
-<!--            <artifactId>logback-core</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -44,10 +35,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun</groupId>
             <artifactId>tools</artifactId>
             <version>1.8.0</version>
             <scope>system</scope>
+            <!--由于作者本人的电脑默认jdk环境是11，这里项目应该用jdk8，所以笔者这里就用的jdk绝对路径，本地开发的时候可以替换为相对路径-->
+            <!--<systemPath>${java.home}/../lib/tools.jar</systemPath>-->
             <systemPath>/Library/Java/JavaVirtualMachines/zulu-8.jdk/Contents/Home/lib/tools.jar</systemPath>
         </dependency>
     </dependencies>
