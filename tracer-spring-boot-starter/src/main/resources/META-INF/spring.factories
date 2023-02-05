@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.liudaolunboluo.config.TracerConfiguration
+  com.liudaolunboluo.tracer.config.TracerConfiguration

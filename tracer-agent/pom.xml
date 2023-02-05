@@ -52,8 +52,8 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>com.liudaolunboluo.MainAgent</Premain-Class>
-                            <Agent-Class>com.liudaolunboluo.MainAgent</Agent-Class>
+                            <Premain-Class>com.liudaolunboluo.tracer.MainAgent</Premain-Class>
+                            <Agent-Class>com.liudaolunboluo.tracer.MainAgent</Agent-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>

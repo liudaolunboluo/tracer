@@ -64,7 +64,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>com.liudaolunboluo.AttachMain</mainClass>
+                            <mainClass>com.liudaolunboluo.tracer.AttachMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
