@@ -13,9 +13,9 @@ public abstract class ResultView<T extends ResultModel> {
     /**
      * formatted printing data to term/tty
      *
-     * @param process
+     * @param result
      */
-    public abstract void draw(T result);
+    public abstract String draw(T result);
 
     /**
      * write str and append a new line

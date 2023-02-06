@@ -29,8 +29,8 @@ public class TraceView extends ResultView<TraceModel> {
     private MethodNode maxCostNode;
 
     @Override
-    public void draw(TraceModel result) {
-        System.out.println(drawTree(result.getRoot()) + "\n");
+    public String draw(TraceModel result) {
+        return drawTree(result.getRoot()) + "\n";
     }
 
     public String drawTree(TraceNode root) {

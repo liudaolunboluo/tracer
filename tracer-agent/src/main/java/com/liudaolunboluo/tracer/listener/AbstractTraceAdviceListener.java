@@ -16,6 +16,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
 
     protected final ThreadLocalWatch threadLocalWatch = new ThreadLocalWatch();
     protected final ThreadLocal<TraceEntity> threadBoundEntity = new ThreadLocal<>();
+    protected final TraceView traceView = new TraceView();
 
     protected TraceEntity threadLocalTraceEntity(ClassLoader loader) {
         TraceEntity traceEntity = threadBoundEntity.get();
@@ -41,16 +42,13 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
     }
 
     @Override
-    public void afterReturning(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Object returnObject)
-            throws Throwable {
+    public void afterReturning(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Object returnObject) {
         threadLocalTraceEntity(loader).tree.end();
-        final Advice advice = Advice.newForAfterReturning(loader, clazz, method, target, args, returnObject);
-        finishing(loader, advice);
+        finishing(loader);
     }
 
     @Override
-    public void afterThrowing(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Throwable throwable)
-            throws Throwable {
+    public void afterThrowing(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Throwable throwable) {
         int lineNumber = -1;
         StackTraceElement[] stackTrace = throwable.getStackTrace();
         if (stackTrace.length != 0) {
@@ -58,15 +56,13 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
 
         threadLocalTraceEntity(loader).tree.end(throwable, lineNumber);
-        final Advice advice = Advice.newForAfterThrowing(loader, clazz, method, target, args, throwable);
-        finishing(loader, advice);
+        finishing(loader);
     }
 
-    private void finishing(ClassLoader loader, Advice advice) {
-        log.info("结束");
+    private void finishing(ClassLoader loader) {
         // 本次调用的耗时
         TraceEntity traceEntity = threadLocalTraceEntity(loader);
-        if (traceEntity.deep >= 1) { // #1817 防止deep为负数
+        if (traceEntity.deep >= 1) {
             traceEntity.deep--;
         }
         if (traceEntity.deep == 0) {
@@ -75,8 +71,8 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                     System.out.print("  result: \n");
                 }
                 log.info(JSON.toJSONString(traceEntity.getModel()));
-                TraceView traceView = new TraceView();
-                traceView.draw(traceEntity.getModel());
+                String rsult = traceView.draw(traceEntity.getModel());
+                System.out.println(rsult);
             } catch (Throwable e) {
                 log.warn("trace failed.", e);
             } finally {
