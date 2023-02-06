@@ -1,6 +1,7 @@
 package com.liudaolunboluo.tracer.listener;
 
 import com.alibaba.fastjson.JSON;
+import com.liudaolunboluo.tracer.TraceResultStorage;
 import com.liudaolunboluo.tracer.trace.ThreadLocalWatch;
 import com.liudaolunboluo.tracer.trace.TraceEntity;
 import com.liudaolunboluo.tracer.view.TraceView;
@@ -44,7 +45,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
     @Override
     public void afterReturning(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Object returnObject) {
         threadLocalTraceEntity(loader).tree.end();
-        finishing(loader);
+        finishing(loader, clazz.getName(), method.getName());
     }
 
     @Override
@@ -56,10 +57,10 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
 
         threadLocalTraceEntity(loader).tree.end(throwable, lineNumber);
-        finishing(loader);
+        finishing(loader, clazz.getName(), method.getName());
     }
 
-    private void finishing(ClassLoader loader) {
+    private void finishing(ClassLoader loader, String className, String methodName) {
         // 本次调用的耗时
         TraceEntity traceEntity = threadLocalTraceEntity(loader);
         if (traceEntity.deep >= 1) {
@@ -67,12 +68,13 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
         if (traceEntity.deep == 0) {
             try {
-                if (this.isVerbose()) {
-                    System.out.print("  result: \n");
+                String result = traceView.draw(traceEntity.getModel());
+                TraceResultStorage.saveTraceTreeResult(result, className, methodName);
+                String methodKey = getMethodKey(className, methodName);
+                if (targetMethodMap.get(methodKey) != null && targetMethodMap.get(methodKey).getIsSaveOriginalResult()) {
+                    TraceResultStorage.saveOriginalResult(JSON.toJSONString(traceEntity.getModel()), className, methodName);
                 }
-                log.info(JSON.toJSONString(traceEntity.getModel()));
-                String rsult = traceView.draw(traceEntity.getModel());
-                System.out.println(rsult);
+                System.out.println(result);
             } catch (Throwable e) {
                 log.warn("trace failed.", e);
             } finally {

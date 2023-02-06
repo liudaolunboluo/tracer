@@ -1,5 +1,11 @@
 package com.liudaolunboluo.tracer.listener;
 
+import com.liudaolunboluo.tracer.param.TargetMethod;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -11,7 +17,11 @@ public abstract class AdviceListenerAdapter implements AdviceListener {
     private Process process;
     private long id = ID_GENERATOR.addAndGet(1);
 
-    private boolean verbose;
+    protected Map<String, TargetMethod> targetMethodMap = new HashMap<>();
+
+    protected String getMethodKey(String className, String methodName) {
+        return className + "#" + methodName;
+    }
 
     @Override
     public void create() {
@@ -107,7 +117,6 @@ public abstract class AdviceListenerAdapter implements AdviceListener {
         return true;
     }
 
-
     /**
      * 是否超过了上限，超过之后，停止输出
      *
@@ -117,15 +126,6 @@ public abstract class AdviceListenerAdapter implements AdviceListener {
      */
     protected boolean isLimitExceeded(int limit, int currentTimes) {
         return currentTimes >= limit;
-    }
-
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 
 }

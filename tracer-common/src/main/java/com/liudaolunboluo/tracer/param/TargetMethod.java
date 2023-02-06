@@ -23,4 +23,7 @@ public class TargetMethod {
      */
     private String methodName;
 
+    @Builder.Default
+    private Boolean isSaveOriginalResult = false;
+
 }

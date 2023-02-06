@@ -52,7 +52,7 @@ public class MainAgent {
         String[] configArr = agentArgs.split(" ");
         List<TargetClass> targetClasses = JSON.parseArray(configArr[0], TargetClass.class);
         inst.addTransformer(
-                new TracerTransformer(targetClasses, new TraceAdviceListener(false), configArr.length <= 1 || Boolean.parseBoolean(configArr[1])),
+                new TracerTransformer(targetClasses, new TraceAdviceListener(targetClasses), configArr.length <= 1 || Boolean.parseBoolean(configArr[1])),
                 true);
         Set<String> targetClassNames = targetClasses.stream().map(TargetClass::getFullClassName).collect(Collectors.toSet());
         List<Class> matchingClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> targetClassNames.contains(clazz.getName()))

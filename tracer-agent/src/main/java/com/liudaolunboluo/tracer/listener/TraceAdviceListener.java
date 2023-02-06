@@ -1,6 +1,11 @@
 package com.liudaolunboluo.tracer.listener;
 
+import com.alibaba.fastjson.JSON;
+import com.liudaolunboluo.tracer.param.TargetClass;
+import com.liudaolunboluo.tracer.param.TargetMethod;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * @author beiwei30 on 29/11/2016.
@@ -11,8 +16,13 @@ public class TraceAdviceListener extends AbstractTraceAdviceListener implements 
     /**
      * Constructor
      */
-    public TraceAdviceListener(boolean verbose) {
-        super.setVerbose(verbose);
+    public TraceAdviceListener(List<TargetClass> targetClasses) {
+        for (TargetClass targetClass : targetClasses) {
+            for (TargetMethod targetMethod : targetClass.getTargetMethodList()) {
+                super.targetMethodMap.put(getMethodKey(targetClass.getFullClassName(), targetMethod.getMethodName()), targetMethod);
+            }
+        }
+        System.out.println("targetMethodMap is :" + JSON.toJSONString(targetMethodMap));
     }
 
     /**

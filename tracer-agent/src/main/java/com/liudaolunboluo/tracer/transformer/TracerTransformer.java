@@ -19,6 +19,7 @@ import com.alibaba.deps.org.objectweb.asm.tree.AbstractInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.ClassNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
+import com.liudaolunboluo.tracer.TraceResultStorage;
 import com.liudaolunboluo.tracer.listener.AdviceListener;
 import com.liudaolunboluo.tracer.listener.AdviceListenerManager;
 import com.liudaolunboluo.tracer.param.TargetClass;
@@ -96,6 +97,14 @@ public class TracerTransformer implements ClassFileTransformer {
                 }
             } catch (Throwable e) {
                 log.error("无法加载SpyAPI", e);
+                return null;
+            }
+            try {
+                if (inClassLoader != null) {
+                    inClassLoader.loadClass(TraceResultStorage.class.getName());
+                }
+            } catch (Throwable e) {
+                log.error("无法加载TraceResultStorage", e);
                 return null;
             }
             //保留原始类读取器以进行字节码优化，避免 JVM 元空间 OOM。
