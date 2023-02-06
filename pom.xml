@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-    <groupId>com.liudaolunboluo.tracer</groupId>
+    <groupId>io.github.liudaolunboluo.tracer</groupId>
     <artifactId>tracer-all</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -12,6 +12,14 @@
     <name>tracer-all</name>
     <description>tracer</description>
     <url>https://github.com/liudaolunboluo/tracer</url>
+
+    <developers>
+        <developer>
+            <name>liudaolunhuiboluo</name>
+            <email>932907369@qq.com</email>
+        </developer>
+    </developers>
+
 
     <modules>
         <module>tracer-agent</module>
@@ -29,6 +37,9 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+        <repository.id>model-snapshot</repository.id>
+        <repository.name>model-snapshot</repository.name>
+        <repository.url>https://jcenter.kuainiujinke.com/artifactory/ai-model-repo-snapshot</repository.url>
     </properties>
 
     <dependencyManagement>
@@ -66,4 +77,75 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+
+        <repository>
+            <id>spring</id>
+            <name>spring</name>
+            <url>https://maven.aliyun.com/repository/spring-plugin</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>cloudera</id>
+            <name>cloudera</name>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
