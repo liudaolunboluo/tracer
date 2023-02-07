@@ -39,10 +39,10 @@ public class TraceResultStorage {
         return PRODUCE_RESULT.poll(1, TimeUnit.SECONDS);
     }
 
-    public void saveTraceTreeResult(String traceTreeResult, String className, String methodName) {
+    public void saveResult(String traceTreeResult, String className, String methodName) {
         ALL_RESULT.add(traceTreeResult);
-        PRODUCE_RESULT.offer(traceTreeResult);
         saveBaseResult(TRACE_TREE_RESULT, traceTreeResult, className, methodName);
+        PRODUCE_RESULT.offer(traceTreeResult);
     }
 
     public void saveOriginalResult(String originalResult, String className, String methodName) {
@@ -53,6 +53,13 @@ public class TraceResultStorage {
         return TRACE_TREE_RESULT.get(className + "#" + methodName);
     }
 
+    public int getTraceTreeResultCount(String className, String methodName) {
+        if (TRACE_TREE_RESULT.get(className + "#" + methodName) == null) {
+            return 0;
+        }
+        return TRACE_TREE_RESULT.get(className + "#" + methodName).size();
+    }
+
     public List<String> getOriginalResult(String className, String methodName) {
         return ORIGINAL_RESULT.get(className + "#" + methodName);
     }
@@ -60,7 +67,7 @@ public class TraceResultStorage {
     private void saveBaseResult(Map<String, List<String>> storage, String result, String className, String methodName) {
         String key = className + DELIMITER + methodName;
         if (storage.get(key) == null) {
-            List<String> resultList = new ArrayList<>();
+            List<String> resultList = new CopyOnWriteArrayList<>();
             resultList.add(result);
             storage.put(key, resultList);
         } else {

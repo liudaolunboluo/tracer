@@ -2,6 +2,7 @@ package com.liudaolunboluo.tracer.listener;
 
 import com.alibaba.fastjson.JSON;
 import com.liudaolunboluo.tracer.common.TraceResultStorage;
+import com.liudaolunboluo.tracer.param.TargetMethod;
 import com.liudaolunboluo.tracer.trace.ThreadLocalWatch;
 import com.liudaolunboluo.tracer.trace.TraceEntity;
 import com.liudaolunboluo.tracer.view.TraceView;
@@ -67,12 +68,11 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
             traceEntity.deep--;
         }
         if (traceEntity.deep == 0) {
+            double cost = threadLocalWatch.costInMillis();
             try {
                 String result = traceView.draw(traceEntity.getModel());
-                TraceResultStorage.saveTraceTreeResult(result, className, methodName);
-                String methodKey = getMethodKey(className, methodName);
-                if (targetMethodMap.get(methodKey) != null && targetMethodMap.get(methodKey).getIsSaveOriginalResult()) {
-                    TraceResultStorage.saveOriginalResult(JSON.toJSONString(traceEntity.getModel()), className, methodName);
+                if (conditionSave(className, methodName, traceEntity, cost)) {
+                    TraceResultStorage.saveResult(result, className, methodName);
                 }
             } catch (Throwable e) {
                 log.warn("trace failed.", e);
@@ -80,5 +80,25 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                 threadBoundEntity.remove();
             }
         }
+    }
+
+    private boolean conditionSave(String className, String methodName, TraceEntity traceEntity, double cost) {
+        boolean isSave = true;
+        TargetMethod targetMethod = targetMethodMap.get(getMethodKey(className, methodName));
+        if (targetMethod != null) {
+            if (Boolean.TRUE.equals(targetMethod.getIsSaveOriginalResult())) {
+                TraceResultStorage.saveOriginalResult(JSON.toJSONString(traceEntity.getModel()), className, methodName);
+            }
+            log.info("cost:{}, CostMoreThan:{},实际耗时小于配置耗时", cost, targetMethod.getCostMoreThan());
+            //            if (targetMethod.getCostMoreThan() != null && cost < targetMethod.getCostMoreThan()) {
+            //
+            //                isSave = false;
+            //            }
+            if (TraceResultStorage.getTraceTreeResultCount(className, methodName) >= targetMethod.getMaxOutput()) {
+                log.info("当前保存次数:{},配置保存次数:{}，不保存", TraceResultStorage.getTraceTreeResultCount(className, methodName), targetMethod.getMaxOutput());
+                isSave = false;
+            }
+        }
+        return isSave;
     }
 }

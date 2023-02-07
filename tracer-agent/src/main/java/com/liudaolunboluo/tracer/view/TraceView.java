@@ -61,7 +61,7 @@ public class TraceView extends ResultView<TraceModel> {
             String costStr = renderCost(methodNode);
             if (node == maxCostNode) {
                 // the node with max cost will be highlighted
-                sb.append(costStr);
+                sb.append("<font color='#FF6363'>").append(costStr).append("</font>");
             } else {
                 sb.append(costStr);
             }

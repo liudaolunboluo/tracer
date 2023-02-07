@@ -28,7 +28,7 @@
     function msg(msg) {
         console.log(msg)
         var div = document.createElement('div');
-        div.innerHTML = msg;
+        div.innerHTML = '<div style="border:6px outset #4169E1;margin-top: 1%;">' + msg + '</div>';
         document.getElementById('result').appendChild(div);
     }
 
@@ -42,13 +42,12 @@
         var source = new EventSource('/train/view/init?id=' + uuid);
 
         source.onmessage = function (event) {
-            //  document.getElementById("result").innerHTML += event.data + "<br />";
             msg(event.data);
         };
 
         //响应open事件
         source.addEventListener('open', function (e) {
-           // msg("连接打开.");
+            // msg("连接打开.");
         }, false);
 
         source.addEventListener('close', function (e) {
@@ -71,3 +70,5 @@
     }
 
 </script>
+
+

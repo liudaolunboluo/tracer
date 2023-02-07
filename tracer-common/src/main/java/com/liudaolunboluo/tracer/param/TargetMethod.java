@@ -23,7 +23,21 @@ public class TargetMethod {
      */
     private String methodName;
 
+    /**
+     * 是否保存原始json内容
+     */
     @Builder.Default
     private Boolean isSaveOriginalResult = false;
+
+    /**
+     * 过滤耗时大于多少,单位ms
+     */
+    private Long costMoreThan;
+
+    /**
+     * 最大输出数，默认为1000
+     */
+    @Builder.Default
+    private Integer maxOutput = 1000;
 
 }

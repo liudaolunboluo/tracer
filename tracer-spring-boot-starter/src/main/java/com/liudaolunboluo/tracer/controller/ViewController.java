@@ -45,8 +45,18 @@ public class ViewController {
     public SseEmitter init(String id) throws IOException {
         SseEmitter sseEmitter = ResultSessionManger.register(id);
         List<String> newResultList = new ArrayList<>();
-        TraceResultStorage.getAllResults().forEach(result -> newResultList.add(result.replace("\n", "<br>")));
-        sseEmitter.send(SseEmitter.event().reconnectTime(1000).data(JSON.toJSONString(newResultList)));
+        List<String> allResults = TraceResultStorage.getAllResults();
+        if (allResults == null || allResults.isEmpty()) {
+            return sseEmitter;
+        }
+        allResults.forEach(result -> {
+            try {
+                sseEmitter.send(result.replace("\n", "<br>"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        //sseEmitter.send(SseEmitter.event().reconnectTime(1000).data(JSON.toJSONString(newResultList)));
         return sseEmitter;
     }
 
