@@ -1,7 +1,7 @@
 package com.liudaolunboluo.tracer.listener;
 
 import com.alibaba.fastjson.JSON;
-import com.liudaolunboluo.tracer.TraceResultStorage;
+import com.liudaolunboluo.tracer.common.TraceResultStorage;
 import com.liudaolunboluo.tracer.trace.ThreadLocalWatch;
 import com.liudaolunboluo.tracer.trace.TraceEntity;
 import com.liudaolunboluo.tracer.view.TraceView;
@@ -74,7 +74,6 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                 if (targetMethodMap.get(methodKey) != null && targetMethodMap.get(methodKey).getIsSaveOriginalResult()) {
                     TraceResultStorage.saveOriginalResult(JSON.toJSONString(traceEntity.getModel()), className, methodName);
                 }
-                System.out.println(result);
             } catch (Throwable e) {
                 log.warn("trace failed.", e);
             } finally {

@@ -19,7 +19,7 @@ import com.alibaba.deps.org.objectweb.asm.tree.AbstractInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.ClassNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodInsnNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
-import com.liudaolunboluo.tracer.TraceResultStorage;
+import com.liudaolunboluo.tracer.common.TraceResultStorage;
 import com.liudaolunboluo.tracer.listener.AdviceListener;
 import com.liudaolunboluo.tracer.listener.AdviceListenerManager;
 import com.liudaolunboluo.tracer.param.TargetClass;

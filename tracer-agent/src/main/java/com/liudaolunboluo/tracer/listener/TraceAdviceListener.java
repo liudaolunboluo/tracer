@@ -22,7 +22,6 @@ public class TraceAdviceListener extends AbstractTraceAdviceListener implements 
                 super.targetMethodMap.put(getMethodKey(targetClass.getFullClassName(), targetMethod.getMethodName()), targetMethod);
             }
         }
-        System.out.println("targetMethodMap is :" + JSON.toJSONString(targetMethodMap));
     }
 
     /**

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>tracer结果</title>
+</head>
+<body>
+<div></div>
+<div id="result"></div>
+</body>
+</html>
+<script>
+
+
+    function getUuid() {
+        var s = [];
+        var hexDigits = "0123456789abcdef";
+        for (var i = 0; i < 36; i++) {
+            s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+        }
+        s[14] = "4";  // bits 12-15 of the time_hi_and_version field to 0010
+        s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
+        s[8] = s[13] = s[18] = s[23] = "-";
+        var uuid = s.join("");
+        return uuid;
+    }
+
+    function msg(msg) {
+        console.log(msg)
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        document.getElementById('result').appendChild(div);
+    }
+
+    //判断浏览器是否支持SSE
+    if (!!window.EventSource) {
+        var uuid = localStorage.getItem("uuid");
+        if (!uuid) {
+            uuid = getUuid();
+            localStorage.setItem("uuid", uuid);
+        }
+        var source = new EventSource('/train/view/init?id=' + uuid);
+
+        source.onmessage = function (event) {
+            //  document.getElementById("result").innerHTML += event.data + "<br />";
+            msg(event.data);
+        };
+
+        //响应open事件
+        source.addEventListener('open', function (e) {
+           // msg("连接打开.");
+        }, false);
+
+        source.addEventListener('close', function (e) {
+            source.close();
+            console.log(e);
+            msg("数据接收完毕，关闭EventSource");
+        }, false);
+
+        //响应error事件
+        source.addEventListener('error', function (e) {
+            if (e.readyState == EventSource.CLOSED) {
+                msg("连接关闭");
+            } else {
+                console.log(e);
+            }
+        }, false);
+
+    } else {
+        msg("你的浏览器不支持结果打印");
+    }
+
+</script>
