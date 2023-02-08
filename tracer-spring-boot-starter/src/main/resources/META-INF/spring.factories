@@ -1,2 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.liudaolunboluo.tracer.config.TracerConfiguration,com.liudaolunboluo.tracer.controller.ViewController
+  com.liudaolunboluo.tracer.config.TracerConfiguration,\
+  com.liudaolunboluo.tracer.controller.ViewController,\
+  com.liudaolunboluo.tracer.core.ApplicationContextHolder,\
+  com.liudaolunboluo.tracer.core.SessionTraceCallback

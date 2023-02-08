@@ -1,5 +1,7 @@
 package com.liudaolunboluo.tracer.config;
 
+import com.liudaolunboluo.tracer.callback.TraceCallback;
+import com.liudaolunboluo.tracer.core.ApplicationContextHolder;
 import com.liudaolunboluo.tracer.launcher.TracerLauncher;
 import com.liudaolunboluo.tracer.param.TracerAttachParam;
 import com.liudaolunboluo.tracer.property.TracerProperties;
@@ -11,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
+import java.util.List;
 
 /**
  * @author zhangyunfan@fiture.com
@@ -29,7 +32,7 @@ public class TracerConfiguration {
 
     @PostConstruct
     public void startAttach() {
-        if (tracerProperties.getTargetClassList() == null || tracerProperties.getTargetClassList().size() == 0) {
+        if (tracerProperties.getTargetClassList() == null || tracerProperties.getTargetClassList().isEmpty()) {
             log.warn("plz config tracer!");
             return;
         }
@@ -39,9 +42,11 @@ public class TracerConfiguration {
             log.warn("can not get current pid,plz check it!");
             return;
         }
+        List<TraceCallback> callbackList = ApplicationContextHolder.getBeansOfType(TraceCallback.class);
+
         String pid = name.split("@")[0];
         TracerAttachParam tracerAttachParam = tracerProperties.buildTracerAttachParam(pid);
-        tracerLauncher.launch(tracerAttachParam);
+        tracerLauncher.launch(tracerAttachParam, callbackList);
         log.info("tracer launch success");
     }
 }

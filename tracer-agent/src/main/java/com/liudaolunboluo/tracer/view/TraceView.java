@@ -1,5 +1,6 @@
 package com.liudaolunboluo.tracer.view;
 
+import com.liudaolunboluo.tracer.callback.TraceCallbackResult;
 import com.liudaolunboluo.tracer.trace.MethodNode;
 import com.liudaolunboluo.tracer.trace.ThreadNode;
 import com.liudaolunboluo.tracer.trace.ThrowNode;
@@ -7,6 +8,7 @@ import com.liudaolunboluo.tracer.trace.TraceModel;
 import com.liudaolunboluo.tracer.trace.TraceNode;
 import com.liudaolunboluo.tracer.common.DateUtils;
 import com.liudaolunboluo.tracer.common.StringUtils;
+import lombok.Getter;
 
 import java.util.List;
 
@@ -26,11 +28,31 @@ public class TraceView extends ResultView<TraceModel> {
 
     // 是否输出耗时
     private boolean isPrintCost = true;
+
+    /**
+     * 最耗时节点
+     */
     private MethodNode maxCostNode;
+
+    /**
+     * 最耗时节点耗时
+     */
+    private Double maxCostNodeCost;
+
+    /**
+     * 全部耗时
+     */
+    private Double allCost;
 
     @Override
     public String draw(TraceModel result) {
         return drawTree(result.getRoot()) + "\n";
+    }
+
+    public TraceCallbackResult generateResult(TraceModel traceModel, String className, String methodName) {
+        String traceTreeResult = drawTree(traceModel.getRoot()) + "\n";
+        return TraceCallbackResult.builder().className(className).methodName(methodName).traceTreeResult(traceTreeResult).cost(allCost)
+                .maxCostClassName(maxCostNode.getClassName()).maxCostMethodName(maxCostNode.getMethodName()).maxCost(maxCostNodeCost).build();
     }
 
     public String drawTree(TraceNode root) {
@@ -60,6 +82,9 @@ public class TraceView extends ResultView<TraceModel> {
 
             String costStr = renderCost(methodNode);
             if (node == maxCostNode) {
+                if (maxCostNodeCost == null) {
+                    maxCostNodeCost = renderOnlyCost(methodNode);
+                }
                 // the node with max cost will be highlighted
                 sb.append("<font color='#FF6363'>").append(costStr).append("</font>");
             } else {
@@ -101,11 +126,20 @@ public class TraceView extends ResultView<TraceModel> {
         }
     }
 
+    private double renderOnlyCost(MethodNode node) {
+        return nanoToMillis(node.getCost());
+    }
+
     private String renderCost(MethodNode node) {
         StringBuilder sb = new StringBuilder();
         if (node.getTimes() <= 1) {
             if (node.parent() instanceof ThreadNode) {
-                sb.append('[').append(nanoToMillis(node.getCost())).append(TIME_UNIT).append("] ");
+                double cost = nanoToMillis(node.getCost());
+                //只取刚刚开始的cos，最后的是尾部时间，不需要
+                if (this.allCost == null) {
+                    this.allCost = cost;
+                }
+                sb.append('[').append(cost).append(TIME_UNIT).append("] ");
             } else {
                 MethodNode parentNode = (MethodNode) node.parent();
                 String percentage = String.format("%.2f", node.getCost() * 100.0 / parentNode.getTotalCost());

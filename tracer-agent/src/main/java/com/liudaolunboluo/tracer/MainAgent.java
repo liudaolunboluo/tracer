@@ -1,16 +1,20 @@
 package com.liudaolunboluo.tracer;
 
 import com.alibaba.fastjson.JSON;
+import com.liudaolunboluo.tracer.callback.TraceCallback;
 import com.liudaolunboluo.tracer.listener.TraceAdviceListener;
 import com.liudaolunboluo.tracer.param.TargetClass;
 import com.liudaolunboluo.tracer.transformer.TracerTransformer;
 import com.liudaolunboluo.tracer.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 /**
@@ -51,12 +55,14 @@ public class MainAgent {
         }
         String[] configArr = agentArgs.split(" ");
         List<TargetClass> targetClasses = JSON.parseArray(configArr[0], TargetClass.class);
-        inst.addTransformer(
-                new TracerTransformer(targetClasses, new TraceAdviceListener(targetClasses), configArr.length <= 1 || Boolean.parseBoolean(configArr[1])),
-                true);
+
         Set<String> targetClassNames = targetClasses.stream().map(TargetClass::getFullClassName).collect(Collectors.toSet());
+        List<Class> callBackList = Arrays.stream(inst.getAllLoadedClasses()).filter(TraceCallback.class::isAssignableFrom)
+                .filter(c -> !Modifier.isAbstract(c.getModifiers())).collect(Collectors.toList());
         List<Class> matchingClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> targetClassNames.contains(clazz.getName()))
                 .collect(Collectors.toList());
+        inst.addTransformer(new TracerTransformer(targetClasses, new TraceAdviceListener(targetClasses, callBackList),
+                configArr.length <= 1 || Boolean.parseBoolean(configArr[1])), true);
         for (Class clazz : matchingClasses) {
             try {
                 inst.retransformClasses(clazz);

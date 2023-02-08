@@ -1,12 +1,19 @@
 package com.liudaolunboluo.tracer.listener;
 
 import com.alibaba.fastjson.JSON;
+import com.liudaolunboluo.tracer.callback.TraceCallbackResult;
+import com.liudaolunboluo.tracer.callback.TracerCallbackManger;
 import com.liudaolunboluo.tracer.common.TraceResultStorage;
 import com.liudaolunboluo.tracer.param.TargetMethod;
 import com.liudaolunboluo.tracer.trace.ThreadLocalWatch;
 import com.liudaolunboluo.tracer.trace.TraceEntity;
 import com.liudaolunboluo.tracer.view.TraceView;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * ；
@@ -18,7 +25,10 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
 
     protected final ThreadLocalWatch threadLocalWatch = new ThreadLocalWatch();
     protected final ThreadLocal<TraceEntity> threadBoundEntity = new ThreadLocal<>();
-    protected final TraceView traceView = new TraceView();
+
+    @Setter
+    @Getter
+    protected List<Class> callbackList;
 
     protected TraceEntity threadLocalTraceEntity(ClassLoader loader) {
         TraceEntity traceEntity = threadBoundEntity.get();
@@ -68,11 +78,33 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
             traceEntity.deep--;
         }
         if (traceEntity.deep == 0) {
-            double cost = threadLocalWatch.costInMillis();
             try {
-                String result = traceView.draw(traceEntity.getModel());
-                if (conditionSave(className, methodName, traceEntity, cost)) {
-                    TraceResultStorage.saveResult(result, className, methodName);
+                TargetMethod targetMethod = targetMethodMap.get(getMethodKey(className, methodName));
+                if (targetMethod == null) {
+                    return;
+                }
+                //hack oom risk，traceView这里如果new的话确实有OOM风险，其实这里不new也可以，就是要自己再去分析一下最大耗时节点等等信息，空间换时间吧，主要原因
+                //还是直接复用了arthas对trace结果的分析，后面有时间自己重写一套算法来解析，就不用new了，这里先记一下，如果因为用了tracer之后OOM请重点排查这里
+                TraceView traceView = new TraceView();
+                TraceCallbackResult traceCallbackResult = traceView.generateResult(traceEntity.getModel(), className, methodName);
+                double cost = traceCallbackResult.getCost();
+                boolean isSave = conditionSave(className, methodName, targetMethod, cost);
+                if (isSave) {
+                    TraceResultStorage.saveResult(traceCallbackResult.getTraceTreeResult(), className, methodName);
+                }
+                //最后回调
+                if (callbackList != null && !callbackList.isEmpty() && isSave) {
+                    for (Class callback : callbackList) {
+                        if (Boolean.TRUE.equals(targetMethod.getIsSaveOriginalResult())) {
+                            traceCallbackResult.setOriginalResult(JSON.toJSONString(traceEntity.getModel()));
+                        }
+                        try {
+                            Method callbackMethod = callback.getDeclaredMethod("callback", TraceCallbackResult.class);
+                            callbackMethod.invoke(TracerCallbackManger.getCallbackInstance(callback), traceCallbackResult);
+                        } catch (Exception e) {
+                            log.error("执行:{}回调的时候异常", callback.getName(), e);
+                        }
+                    }
                 }
             } catch (Throwable e) {
                 log.warn("trace failed.", e);
@@ -82,22 +114,13 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
     }
 
-    private boolean conditionSave(String className, String methodName, TraceEntity traceEntity, double cost) {
+    private boolean conditionSave(String className, String methodName, TargetMethod targetMethod, double cost) {
         boolean isSave = true;
-        TargetMethod targetMethod = targetMethodMap.get(getMethodKey(className, methodName));
-        if (targetMethod != null) {
-            if (Boolean.TRUE.equals(targetMethod.getIsSaveOriginalResult())) {
-                TraceResultStorage.saveOriginalResult(JSON.toJSONString(traceEntity.getModel()), className, methodName);
-            }
-            log.info("cost:{}, CostMoreThan:{},实际耗时小于配置耗时", cost, targetMethod.getCostMoreThan());
-            //            if (targetMethod.getCostMoreThan() != null && cost < targetMethod.getCostMoreThan()) {
-            //
-            //                isSave = false;
-            //            }
-            if (TraceResultStorage.getTraceTreeResultCount(className, methodName) >= targetMethod.getMaxOutput()) {
-                log.info("当前保存次数:{},配置保存次数:{}，不保存", TraceResultStorage.getTraceTreeResultCount(className, methodName), targetMethod.getMaxOutput());
-                isSave = false;
-            }
+        if (targetMethod.getCostMoreThan() != null && cost < targetMethod.getCostMoreThan()) {
+            isSave = false;
+        }
+        if (TraceResultStorage.getTraceTreeResultCount(className, methodName) >= targetMethod.getMaxOutput()) {
+            isSave = false;
         }
         return isSave;
     }

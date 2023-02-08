@@ -16,7 +16,8 @@ public class TraceAdviceListener extends AbstractTraceAdviceListener implements 
     /**
      * Constructor
      */
-    public TraceAdviceListener(List<TargetClass> targetClasses) {
+    public TraceAdviceListener(List<TargetClass> targetClasses, List<Class> callbackList) {
+        this.callbackList = callbackList;
         for (TargetClass targetClass : targetClasses) {
             for (TargetMethod targetMethod : targetClass.getTargetMethodList()) {
                 super.targetMethodMap.put(getMethodKey(targetClass.getFullClassName(), targetMethod.getMethodName()), targetMethod);

@@ -42,9 +42,8 @@ public class ViewController {
      * 开始链接的时候调用，就是打开网页的时候调用
      */
     @GetMapping(path = "/init")
-    public SseEmitter init(String id) throws IOException {
+    public SseEmitter init(String id) {
         SseEmitter sseEmitter = ResultSessionManger.register(id);
-        List<String> newResultList = new ArrayList<>();
         List<String> allResults = TraceResultStorage.getAllResults();
         if (allResults == null || allResults.isEmpty()) {
             return sseEmitter;
@@ -56,21 +55,7 @@ public class ViewController {
                 e.printStackTrace();
             }
         });
-        //sseEmitter.send(SseEmitter.event().reconnectTime(1000).data(JSON.toJSONString(newResultList)));
         return sseEmitter;
-    }
-
-    @Scheduled(initialDelay = 0, fixedDelay = 2000)
-    public void run() {
-        try {
-            String result = TraceResultStorage.pollNewResult();
-            if (!StringUtils.hasText(result)) {
-                return;
-            }
-            ResultSessionManger.broadcastSend(result);
-        } catch (Exception e) {
-            log.error("推送结果失败", e);
-        }
     }
 
 }
