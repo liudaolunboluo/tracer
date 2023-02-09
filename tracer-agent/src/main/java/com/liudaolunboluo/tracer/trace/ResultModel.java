@@ -12,7 +12,7 @@ public abstract class ResultModel {
     /**
      * Command type (name)
      *
-     * @return
+     * @return String
      */
     public abstract String getType();
 

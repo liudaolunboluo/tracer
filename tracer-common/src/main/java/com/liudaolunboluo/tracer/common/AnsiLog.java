@@ -77,7 +77,7 @@ public abstract class AnsiLog {
      *
      * @see Level
      * @param level
-     * @return
+     * @return Level
      */
     public static Level level(Level level) {
         Level old = LEVEL;
@@ -88,7 +88,7 @@ public abstract class AnsiLog {
     /**
      * get current logger Level
      *
-     * @return
+     * @return Level
      */
     public static Level level() {
         return LEVEL;

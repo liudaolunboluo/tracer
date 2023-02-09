@@ -57,10 +57,12 @@ public class MainAgent {
         List<TargetClass> targetClasses = JSON.parseArray(configArr[0], TargetClass.class);
 
         Set<String> targetClassNames = targetClasses.stream().map(TargetClass::getFullClassName).collect(Collectors.toSet());
+        log.info("targetClassNames:{}", targetClassNames.toArray());
         List<Class> callBackList = Arrays.stream(inst.getAllLoadedClasses()).filter(TraceCallback.class::isAssignableFrom)
                 .filter(c -> !Modifier.isAbstract(c.getModifiers())).collect(Collectors.toList());
         List<Class> matchingClasses = Arrays.stream(inst.getAllLoadedClasses()).filter(clazz -> targetClassNames.contains(clazz.getName()))
                 .collect(Collectors.toList());
+        log.info("matchingClasses:{}", matchingClasses.toArray());
         inst.addTransformer(new TracerTransformer(targetClasses, new TraceAdviceListener(targetClasses, callBackList),
                 configArr.length <= 1 || Boolean.parseBoolean(configArr[1])), true);
         for (Class clazz : matchingClasses) {

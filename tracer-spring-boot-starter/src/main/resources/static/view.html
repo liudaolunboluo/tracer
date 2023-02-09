@@ -11,6 +11,14 @@
 </html>
 <script>
 
+    function getQueryString(name) {
+        let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        let r = window.location.search.substr(1).match(reg); //获取url中"?"符后的字符串并正则匹配
+        let context = '';
+        if (r) context = r[2];
+        return context ? context : '';
+    }
+
 
     function getUuid() {
         var s = [];
@@ -26,7 +34,6 @@
     }
 
     function msg(msg) {
-        console.log(msg)
         var div = document.createElement('div');
         div.innerHTML = '<div style="border:6px outset #4169E1;margin-top: 1%;">' + msg + '</div>';
         document.getElementById('result').appendChild(div);
@@ -39,7 +46,14 @@
             uuid = getUuid();
             localStorage.setItem("uuid", uuid);
         }
-        var source = new EventSource('/train/view/init?id=' + uuid);
+        var baseUrl = decodeURIComponent(getQueryString('baseUrl'))
+        var finalUrl = '';
+        if (baseUrl !== "''") {
+            finalUrl = baseUrl + '/tracer/view/init?id=' + uuid
+        } else {
+            finalUrl = '/tracer/view/init?id=' + uuid
+        }
+        var source = new EventSource(finalUrl);
 
         source.onmessage = function (event) {
             msg(event.data);
@@ -52,7 +66,6 @@
 
         source.addEventListener('close', function (e) {
             source.close();
-            console.log(e);
             msg("数据接收完毕，关闭EventSource");
         }, false);
 

@@ -52,7 +52,8 @@ public class TraceView extends ResultView<TraceModel> {
     public TraceCallbackResult generateResult(TraceModel traceModel, String className, String methodName) {
         String traceTreeResult = drawTree(traceModel.getRoot()) + "\n";
         return TraceCallbackResult.builder().className(className).methodName(methodName).traceTreeResult(traceTreeResult).cost(allCost)
-                .maxCostClassName(maxCostNode.getClassName()).maxCostMethodName(maxCostNode.getMethodName()).maxCost(maxCostNodeCost).build();
+                .maxCostClassName(maxCostNode != null ? maxCostNode.getClassName() : null)
+                .maxCostMethodName(maxCostNode != null ? maxCostNode.getMethodName() : null).maxCost(maxCostNodeCost).build();
     }
 
     public String drawTree(TraceNode root) {

@@ -170,7 +170,7 @@ public class ProcessUtils {
      * 5. If jdk <= 8 and tools.jar do not exists under JAVA_HOME, throw IllegalArgumentException
      * </pre>
      *
-     * @return
+     * @return String
      */
     public static String findJavaHome() {
         if (FOUND_JAVA_HOME != null) {

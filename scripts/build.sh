@@ -18,13 +18,12 @@ zip -r -o tracer-attach.zip tracer-attach.jar
 cd ../../
 cp tracer-attach/target/tracer-attach.zip tracer-launcher/src/main/resources
 cd tracer-common
-mvn clean install deploy
+mvn clean install
 cd ..
 cd tracer-launcher
-mvn clean install deploy
+mvn clean install
 cd ..
 cd tracer-sping-boot-starter
-mvn clean install deploy
-cd ..
-echo "编译完成"
+mvn clean install
+mvn package deploy
 
