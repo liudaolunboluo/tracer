@@ -25,5 +25,6 @@ mvn clean install
 cd ..
 cd tracer-sping-boot-starter
 mvn clean install
-mvn package deploy
+
+mvn clean install deploy
 
