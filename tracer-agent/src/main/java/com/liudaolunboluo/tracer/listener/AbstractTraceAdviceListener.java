@@ -99,8 +99,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                             traceCallbackResult.setOriginalResult(JSON.toJSONString(traceEntity.getModel()));
                         }
                         try {
-                            Method callbackMethod = callback.getDeclaredMethod("callback", TraceCallbackResult.class);
-                            callbackMethod.invoke(TracerCallbackManger.getCallbackInstance(callback), traceCallbackResult);
+                            TracerCallbackManger.getCallbackInstance(callback).callback(traceCallbackResult);
                         } catch (Exception e) {
                             log.error("执行:{}回调的时候异常", callback.getName(), e);
                         }
