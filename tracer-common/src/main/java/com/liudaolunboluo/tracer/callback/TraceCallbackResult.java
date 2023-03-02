@@ -57,4 +57,9 @@ public class TraceCallbackResult {
      * 原始json结果，只有当isSaveOriginalResult为true当时候才有值
      */
     private String originalResult;
+
+    /**
+     * 当次调用的参数
+     */
+    private Object[] args;
 }

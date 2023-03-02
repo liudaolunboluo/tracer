@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -56,7 +57,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
     @Override
     public void afterReturning(ClassLoader loader, Class<?> clazz, ArthasMethod method, Object target, Object[] args, Object returnObject) {
         threadLocalTraceEntity(loader).tree.end();
-        finishing(loader, clazz.getName(), method.getName());
+        finishing(loader, clazz.getName(), method.getName(), args);
     }
 
     @Override
@@ -68,10 +69,10 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
         }
 
         threadLocalTraceEntity(loader).tree.end(throwable, lineNumber);
-        finishing(loader, clazz.getName(), method.getName());
+        finishing(loader, clazz.getName(), method.getName(), args);
     }
 
-    private void finishing(ClassLoader loader, String className, String methodName) {
+    private void finishing(ClassLoader loader, String className, String methodName, Object[] args) {
         // 本次调用的耗时
         TraceEntity traceEntity = threadLocalTraceEntity(loader);
         if (traceEntity.deep >= 1) {
@@ -92,6 +93,7 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                 if (isSave) {
                     TraceResultStorage.saveResult(traceCallbackResult.getTraceTreeResult(), className, methodName);
                 }
+                traceCallbackResult.setArgs(args);
                 //最后回调
                 if (callbackList != null && !callbackList.isEmpty() && isSave) {
                     for (Class callback : callbackList) {
