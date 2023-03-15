@@ -1,5 +1,6 @@
 package com.liudaolunboluo.tracer.callback;
 
+import com.liudaolunboluo.tracer.result.TraceRootResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,9 +55,9 @@ public class TraceCallbackResult {
     private Double maxCost;
 
     /**
-     * 原始json结果，只有当isSaveOriginalResult为true当时候才有值
+     * 原始trace结果，只有当isSaveOriginalResult为true当时候才有值
      */
-    private String originalResult;
+    private TraceRootResult originalResult;
 
     /**
      * 当次调用的参数

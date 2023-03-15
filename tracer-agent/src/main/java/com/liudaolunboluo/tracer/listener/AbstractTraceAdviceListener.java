@@ -1,10 +1,12 @@
 package com.liudaolunboluo.tracer.listener;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.liudaolunboluo.tracer.callback.TraceCallbackResult;
 import com.liudaolunboluo.tracer.callback.TracerCallbackManger;
 import com.liudaolunboluo.tracer.common.TraceResultStorage;
 import com.liudaolunboluo.tracer.param.TargetMethod;
+import com.liudaolunboluo.tracer.result.TraceRootResult;
 import com.liudaolunboluo.tracer.trace.ThreadLocalWatch;
 import com.liudaolunboluo.tracer.trace.TraceEntity;
 import com.liudaolunboluo.tracer.view.TraceView;
@@ -98,7 +100,10 @@ public class AbstractTraceAdviceListener extends AdviceListenerAdapter {
                 if (callbackList != null && !callbackList.isEmpty() && isSave) {
                     for (Class callback : callbackList) {
                         if (Boolean.TRUE.equals(targetMethod.getIsSaveOriginalResult())) {
-                            traceCallbackResult.setOriginalResult(JSON.toJSONString(traceEntity.getModel()));
+                            //hack 原始trace结果类型转换太多，这里暂时先用json来转，我知道很low，后面在优化吧
+                            JSONObject root = (JSONObject) JSON.parseObject(JSON.toJSONString(traceEntity.getModel())).get("root");
+                            final TraceRootResult traceRootResult = JSON.parseObject(String.valueOf(root), TraceRootResult.class);
+                            traceCallbackResult.setOriginalResult(traceRootResult);
                         }
                         try {
                             TracerCallbackManger.getCallbackInstance(callback).callback(traceCallbackResult);
