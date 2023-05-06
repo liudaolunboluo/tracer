@@ -23,8 +23,8 @@ cd ..
 cd tracer-launcher
 mvn clean install
 cd ..
-cd tracer-sping-boot-starter
+cd tracer-spring-boot-starter
 mvn clean install
-
+cd ..
 mvn clean install deploy
 

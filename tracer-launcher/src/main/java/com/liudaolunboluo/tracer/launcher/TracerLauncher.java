@@ -50,9 +50,9 @@ public class TracerLauncher {
             File tempDir = CommonUtil.createTempDir();
             ZipUtil.unpack(coreJarUrl.openStream(), tempDir);
             String agentHome = tempDir.getAbsolutePath();
-            File agentJarFile = new File(agentHome, ATTACH_JAR);
+            File attachJar = new File(agentHome, ATTACH_JAR);
             //java -jar tracer-attach.jar configJson
-            Process process = Runtime.getRuntime().exec("java -jar " + agentJarFile.getAbsolutePath() + " " + JSON.toJSONString(param));
+            Process process = Runtime.getRuntime().exec("java -jar " + attachJar.getAbsolutePath() + " " + JSON.toJSONString(param));
             printResults(process);
         } catch (Exception e) {
             log.warn("launch tracer-attach fail", e);

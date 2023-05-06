@@ -39,7 +39,8 @@ public class TracerAttacher {
             vm.detach();
             System.out.println("attach " + param.getPid() + " success!");
         } catch (Exception e) {
-            System.out.println("attach tracer fail " + e);
+            e.printStackTrace();
+            System.out.println("attach tracer fail ,error:" + e);
         }
     }
 }
